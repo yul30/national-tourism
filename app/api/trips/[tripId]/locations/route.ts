@@ -22,7 +22,7 @@ async function geocodeAddress(address: string) {
 
     const data = await response.json();
 
-    if (data && data.length > 0) {
+    if (data.length > 0) {
       return {
         lat: parseFloat(data[0].lat),
         lng: parseFloat(data[0].lon),
@@ -31,7 +31,7 @@ async function geocodeAddress(address: string) {
 
     return null;
   } catch (error) {
-    console.error("❌ Ошибка геокодирования:", error);
+    console.error("Ошибка геокодирования:", error);
     return null;
   }
 }
@@ -39,10 +39,10 @@ async function geocodeAddress(address: string) {
 // POST /api/trips/[tripId]/locations
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ tripId: string }> }
+  { params }: { params: Promise<{ tripId: string }> }
 ) {
   try {
-    const { tripId } = await context.params;
+    const { tripId } = await params;
 
     const session = await auth();
 
@@ -55,10 +55,13 @@ export async function POST(
 
     const formData = await request.formData();
 
-    const locationTitle = formData.get("locationTitle")?.toString();
+    const locationTitle = formData
+      .get("locationTitle")
+      ?.toString();
 
     const address =
-      formData.get("address")?.toString() || locationTitle;
+      formData.get("address")?.toString() ??
+      locationTitle;
 
     if (!locationTitle || !address) {
       return NextResponse.json(
@@ -68,7 +71,9 @@ export async function POST(
     }
 
     const trip = await prisma.trip.findUnique({
-      where: { id: tripId },
+      where: {
+        id: tripId,
+      },
     });
 
     if (!trip) {
@@ -85,27 +90,33 @@ export async function POST(
       );
     }
 
-    const coordinates = await geocodeAddress(address);
+    const coordinates =
+      await geocodeAddress(address);
 
-    const count = await prisma.location.count({
-      where: { tripId },
-    });
+    const count =
+      await prisma.location.count({
+        where: {
+          tripId,
+        },
+      });
 
-    const location = await prisma.location.create({
-      data: {
-        locationTitle,
-        lat: coordinates?.lat || 55.7558,
-        lng: coordinates?.lng || 37.6173,
-        tripId,
-        order: count,
-      },
-    });
+    const location =
+      await prisma.location.create({
+        data: {
+          locationTitle,
+          lat: coordinates?.lat ?? 55.7558,
+          lng: coordinates?.lng ?? 37.6173,
+          tripId,
+          order: count,
+        },
+      });
 
-    return NextResponse.json(location, {
-      status: 201,
-    });
+    return NextResponse.json(
+      location,
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("❌ Ошибка:", error);
+    console.error("Ошибка:", error);
 
     return NextResponse.json(
       { error: "Ошибка сервера" },
@@ -116,11 +127,11 @@ export async function POST(
 
 // GET /api/trips/[tripId]/locations
 export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ tripId: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
 ) {
   try {
-    const { tripId } = await context.params;
+    const { tripId } = await params;
 
     const session = await auth();
 
@@ -131,18 +142,25 @@ export async function GET(
       );
     }
 
-    const locations = await prisma.location.findMany({
-      where: { tripId },
-      orderBy: { order: "asc" },
-    });
+    const locations =
+      await prisma.location.findMany({
+        where: {
+          tripId,
+        },
+        orderBy: {
+          order: "asc",
+        },
+      });
 
-    return NextResponse.json(locations);
+    return NextResponse.json(
+      locations
+    );
   } catch (error) {
-    console.error("❌ Ошибка:", error);
+    console.error("Ошибка:", error);
 
     return NextResponse.json(
       { error: "Ошибка сервера" },
       { status: 500 }
     );
   }
-   }
+}
