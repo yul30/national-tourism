@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-// Бесплатное геокодирование через OpenStreetMap
 async function geocodeAddress(address: string) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -22,27 +21,34 @@ async function geocodeAddress(address: string) {
 
     const data = await response.json();
 
-    if (data.length > 0) {
+    if (data?.length > 0) {
       return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
+        lat: Number(data[0].lat),
+        lng: Number(data[0].lon),
       };
     }
 
     return null;
   } catch (error) {
     console.error("Ошибка геокодирования:", error);
+
     return null;
   }
 }
 
-// POST /api/trips/[tripId]/locations
+type RouteContext = {
+  params: Promise<{
+    tripId: string;
+  }>;
+};
+
+// POST
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ tripId: string }> }
+  context: RouteContext
 ) {
   try {
-    const { tripId } = await params;
+    const { tripId } = await context.params;
 
     const session = await auth();
 
@@ -55,12 +61,11 @@ export async function POST(
 
     const formData = await request.formData();
 
-    const locationTitle = formData
-      .get("locationTitle")
-      ?.toString();
+    const locationTitle =
+      formData.get("locationTitle")?.toString();
 
     const address =
-      formData.get("address")?.toString() ??
+      formData.get("address")?.toString() ||
       locationTitle;
 
     if (!locationTitle || !address) {
@@ -104,9 +109,16 @@ export async function POST(
       await prisma.location.create({
         data: {
           locationTitle,
-          lat: coordinates?.lat ?? 55.7558,
-          lng: coordinates?.lng ?? 37.6173,
+          lat:
+            coordinates?.lat ??
+            55.7558,
+
+          lng:
+            coordinates?.lng ??
+            37.6173,
+
           tripId,
+
           order: count,
         },
       });
@@ -116,7 +128,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error("Ошибка:", error);
+    console.error(error);
 
     return NextResponse.json(
       { error: "Ошибка сервера" },
@@ -125,13 +137,14 @@ export async function POST(
   }
 }
 
-// GET /api/trips/[tripId]/locations
+// GET
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ tripId: string }> }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
-    const { tripId } = await params;
+    const { tripId } =
+      await context.params;
 
     const session = await auth();
 
@@ -147,6 +160,7 @@ export async function GET(
         where: {
           tripId,
         },
+
         orderBy: {
           order: "asc",
         },
@@ -156,7 +170,7 @@ export async function GET(
       locations
     );
   } catch (error) {
-    console.error("Ошибка:", error);
+    console.error(error);
 
     return NextResponse.json(
       { error: "Ошибка сервера" },
