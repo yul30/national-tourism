@@ -1,0 +1,10 @@
+const CHUNK_PUBLIC_PATH = "server/app/api/ai-suggestions/route.js";
+const runtime = require("../../../chunks/[turbopack]_runtime.js");
+runtime.loadChunk("server/chunks/[root-of-the-server]__7d5b7789._.js");
+runtime.loadChunk("server/chunks/node_modules_next_1df31ba9._.js");
+runtime.loadChunk("server/chunks/e044d_@auth_core_2b85f6a3._.js");
+runtime.loadChunk("server/chunks/node_modules_jose_dist_webapi_cb98388b._.js");
+runtime.loadChunk("server/chunks/node_modules_9fe8fe9e._.js");
+runtime.getOrInstantiateRuntimeModule("[project]/.next-internal/server/app/api/ai-suggestions/route/actions.js [app-rsc] (server actions loader, ecmascript)", CHUNK_PUBLIC_PATH);
+runtime.getOrInstantiateRuntimeModule("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/app/api/ai-suggestions/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)", CHUNK_PUBLIC_PATH);
+module.exports = runtime.getOrInstantiateRuntimeModule("[project]/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/app/api/ai-suggestions/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)", CHUNK_PUBLIC_PATH).exports;

@@ -1,0 +1,11 @@
+{
+  "[project]/components/map.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/components/map.tsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/node_modules_leaflet_dist_leaflet_88e19fd3.css",
+      "static/chunks/node_modules_leaflet_dist_leaflet-src_0b553c07.js",
+      "static/chunks/components_map_tsx_c2ddb07a._.js",
+      "static/chunks/components_map_tsx_42068784._.js"
+    ]
+  }
+}
